@@ -1,6 +1,6 @@
   
 
-// Middleware qui protégera les routes sélectionnées et vérifier que l'utilisateur est authentifié avant d'autoriser l'envoi de ses requêtes.
+// Middleware  qui protégera les routes sélectionnées et vérifier que l'utilisateur est authentifié avant d'autoriser l'envoi de ses requêtes.
 
 // On récupère le package jsonwebtoken
 const jwt = require('jsonwebtoken');
