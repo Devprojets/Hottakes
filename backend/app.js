@@ -7,7 +7,6 @@ const express = require('express'); // Importation d'express => Framework basé 
 
 // Pour gérer la demande POST provenant de l'application front-end, nous devrons être capables d'extraire l'objet JSON de la demande, on importe donc body-parser
 const bodyParser = require('body-parser'); // Permet d'extraire l'objet JSON des requêtes POST
-     pfke^rsdv
 // On importe mongoose pour pouvoir utiliser la base de données
 const mongoose = require('mongoose'); // Plugin Mongoose pour se connecter à la data base Mongo Db
 
