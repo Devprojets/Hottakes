@@ -5,8 +5,7 @@
 // import des modules npm - Ajout des plugins externes
 const express = require('express'); // Importation d'express => Framework basé sur node.js
 
-// Pour gérer la demande POST provenant de l'application front-end, nous devrons être capables d'extraire l'objet JSON de la demande, on importe donc body-parser
-const bodyParser = require('body-parser'); // Permet d'extraire l'objet JSON des requêtes POST
+
 // On importe mongoose pour pouvoir utiliser la base de données
 const mongoose = require('mongoose'); // Plugin Mongoose pour se connecter à la data base Mongo Db
 
@@ -18,6 +17,7 @@ const path = require('path'); // Plugin qui sert dans l'upload des images et per
 // et ajoute une protection XSS mineure et protège contre le reniflement de TYPE MIME
 // cross-site scripting, sniffing et clickjacking
 const helmet = require('helmet');
+const rateLimit = require('express-rate-limit')
 const session = require('cookie-session');
 const nocache = require('nocache');
 
@@ -29,6 +29,7 @@ const userRoutes = require('./routes/user');
 
 // utilisation du module 'dotenv' pour masquer les informations de connexion à la base de données à l'aide de variables d'environnement
 require('dotenv').config();
+
 
 
 // Connection à la base de données MongoDB avec la sécurité vers le fichier .env pour cacher le mot de passe
@@ -43,6 +44,18 @@ mongoose.connect(process.env.DB_URI, {
 
 // Création d'une application express
 const app = express(); // L'application utilise le framework express
+
+//rate-limit//
+const limiter = rateLimit({
+	windowMs: 15 * 60 * 1000, // 15 minutes
+	max: 100, // Limit each IP to 100 requests per `window` (here, per 15 minutes)
+	standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+	legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+})
+
+// Apply the rate limiting middleware to all requests
+app.use(limiter)
+
 
 // Middleware Header pour contourner les erreurs en débloquant certains systèmes de sécurité CORS, afin que tout le monde puisse faire des requetes depuis son navigateur
 app.use((req, res, next) => {
@@ -70,20 +83,15 @@ app.use(session({
   }
 }));
 
-// Rendre la requete exploitable
 
-// Middleware qui permet de parser les requêtes envoyées par le client, on peut y accéder grâce à req.body
-app.use(bodyParser.urlencoded({
-  extended: true
-}));
+app.use(express.json());
 
-// On utilise une méthode body-parser pour la transformation du corps de la requête en JSON, en objet JS utilisable
+
 // Sachant que l'on va créer une requête post pour permettre à l'utilisateur de mettre en ligne une sauce sur la base d'un schéma créer dans Sauce.js
-// il va falloir traiter les données associées à cette requête, autrement dit d'extraire l'objet JSON de la demande en provenance du frontend : on aura recours à body-parser.
 // Il faut qu'elle soit soit formatée pour être utilisée
 
 // Transforme les données arrivant de la requête POST en un objet JSON facilement exploitable
-app.use(bodyParser.json());
+
 
 // Sécuriser Express en définissant divers en-têtes HTTP - https://www.npmjs.com/package/helmet#how-it-works
 // On utilise helmet pour plusieurs raisons notamment la mise en place du X-XSS-Protection afin d'activer le filtre de script intersites(XSS) dans les navigateurs web
